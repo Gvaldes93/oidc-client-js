@@ -136,7 +136,7 @@ export default class UserManager extends OidcClient {
     }
     signinPopupCallback(url) {
         Log.debug("UserManager.signinPopupCallback");
-        return this._signinCallback(url, this._popupNavigator).then(user => {
+        return this._signinCallback(url,'', this._popupNavigator).then(user => {
             if (user) {
                 if (user.profile && user.profile.sub) {
                     Log.info("signinPopupCallback successful, signed in sub: ", user.profile.sub);
@@ -190,9 +190,9 @@ export default class UserManager extends OidcClient {
             return user;
         });
     }
-    signinSilentCallback(url) {
+    signinSilentCallback(url, parentUrl) {
         Log.debug("UserManager.signinSilentCallback");
-        return this._signinCallback(url, this._iframeNavigator).then(user => {
+        return this._signinCallback(url, parentUrl, this._iframeNavigator).then(user => {
             if (user) {
                 if (user.profile && user.profile.sub) {
                     Log.info("signinSilentCallback successful, signed in sub: ", user.profile.sub);
@@ -287,9 +287,9 @@ export default class UserManager extends OidcClient {
             });
         });
     }
-    _signinCallback(url, navigator) {
+    _signinCallback(url, parentUrl, navigator) {
         Log.debug("_signinCallback");
-        return navigator.callback(url);
+        return navigator.callback(url, parentUrl);
     }
 
     signoutRedirect(args = {}) {

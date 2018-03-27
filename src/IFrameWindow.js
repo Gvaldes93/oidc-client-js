@@ -90,7 +90,6 @@ export default class IFrameWindow {
         Log.debug("IFrameWindow._message");
 
         if (this._timer &&
-            e.origin === this._origin &&
             e.source === this._frame.contentWindow
         ) {
             let url = e.data;
@@ -107,14 +106,14 @@ export default class IFrameWindow {
         return location.protocol + "//" + location.host;
     }
 
-    static notifyParent(url) {
+    static notifyParent(url, parentUrl) {
         Log.debug("IFrameWindow.notifyParent");
 
         if (window.parent && window !== window.parent) {
             url = url || window.location.href;
             if (url) {
                 Log.debug("posting url message to parent");
-                window.parent.postMessage(url, location.protocol + "//" + location.host);
+                window.parent.postMessage(parentUrl, location.protocol + "//" + location.host);
             }
         }
     }
