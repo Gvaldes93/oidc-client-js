@@ -26,7 +26,8 @@ export default class IFrameWindow {
         this._frame.style.display = "none";
         this._frame.style.width = 0;
         this._frame.style.height = 0;
-        
+        this._frame.name = params.originUrl;
+
         window.document.body.appendChild(this._frame);
     }
 
@@ -90,9 +91,10 @@ export default class IFrameWindow {
         Log.debug("IFrameWindow._message");
 
         if (this._timer &&
-            e.source === this._frame.contentWindow
+            e.source === this._frame.contentWindow &&
+            e.data.type && e.data.type === "signinSilentResponse"
         ) {
-            let url = e.data;
+            let url = e.data.url;
             if (url) {
                 this._success({ url: url });
             }
@@ -106,14 +108,26 @@ export default class IFrameWindow {
         return location.protocol + "//" + location.host;
     }
 
-    static notifyParent(url, parentUrl) {
+    static notifyParent(url) {
         Log.debug("IFrameWindow.notifyParent");
 
         if (window.parent && window !== window.parent) {
             url = url || window.location.href;
             if (url) {
                 Log.debug("posting url message to parent");
-                window.parent.postMessage(parentUrl, location.protocol + "//" + location.host);
+
+                const originUrl = window.name;
+                if (originUrl) {
+                    window.parent.postMessage({type: 'signinSilentResponse', url: url}, `${originUrl}`);
+                    return;    
+                } 
+              
+                // protocol = document.referrer ? document.referrer.split('//')[0] : location.protocol;
+
+                const protocol = location.protocol;
+                const host = location.host;
+                
+                window.parent.postMessage({type: 'signinSilentResponse', url: url}, `${protocol}//${host}`);
             }
         }
     }

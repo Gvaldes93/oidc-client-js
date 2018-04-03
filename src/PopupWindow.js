@@ -23,7 +23,12 @@ export default class PopupWindow {
         let target = params.popupWindowTarget || DefaultPopupTarget;
         let features = params.popupWindowFeatures || DefaultPopupFeatures;
 
+        this._boundMessageEvent = this._message.bind(this);
+        window.addEventListener("message", this._boundMessageEvent, false);
+
         this._popup = window.open('', target, features);
+        this._popup.name = params.originUrl;
+
         if (this._popup) {
             Log.debug("popup successfully created");
             this._checkForPopupClosedTimer = window.setInterval(this._checkForPopupClosed.bind(this), CheckForPopupClosedInterval);
@@ -48,7 +53,7 @@ export default class PopupWindow {
 
             this._id = params.id;
             if (this._id) {
-                window["popupCallback_" + params.id] = this._callback.bind(this);
+                window["popupCallback_" + params.id];
             }
 
             this._popup.focus();
@@ -87,6 +92,8 @@ export default class PopupWindow {
             this._popup.close();
         }
         this._popup = null;
+
+        window.removeEventListener("message", this._boundMessageEvent, false);
     }
 
     _checkForPopupClosed() {
@@ -94,6 +101,12 @@ export default class PopupWindow {
 
         if (!this._popup || this._popup.closed) {
             this._error("Popup window closed");
+        }
+    }
+
+    _message(e) {
+        if (e.data.type && e.data.type === "signinPopupResponse") {
+            this._callback(e.data.url, e.data.keepOpen);
         }
     }
 
@@ -120,14 +133,11 @@ export default class PopupWindow {
                 var data = UrlUtility.parseUrlFragment(url, delimiter);
                 
                 if (data.state) {
-                    var name = "popupCallback_" + data.state;
-                    var callback = window.opener[name]; 
-                    if (callback) {
-                        Log.debug("passing url message to opener");
-                        callback(url, keepOpen);
-                    }
-                    else {
-                        Log.warn("no matching callback found on opener");
+                    const originUrl = window.name;
+
+                    if (originUrl) {
+                        window.opener.postMessage({type: "signinPopupResponse", url: url, keepOpen: keepOpen}, `${originUrl}`);
+                        return;    
                     }
                 }
                 else {

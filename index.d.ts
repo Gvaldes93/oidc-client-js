@@ -154,7 +154,7 @@ export class UserManager extends OidcClient {
   signinPopupCallback(url?: string): Promise<any>;
 
   signinSilent(args?: any): Promise<User>;
-  signinSilentCallback(url?: string, parentUrl?: string): Promise<any>;
+  signinSilentCallback(url?: string): Promise<any>;
 
   signinRedirect(args?: any): Promise<any>;
   signinRedirectCallback(url?: string): Promise<User>;
@@ -212,6 +212,7 @@ export interface UserManagerSettings extends OidcClientSettings {
   readonly popupNavigator?: any;
   readonly iframeNavigator?: any;
   readonly userStore?: any;
+  readonly originUrl?: string;
 }
 
 export interface WebStorageStateStoreSettings {
