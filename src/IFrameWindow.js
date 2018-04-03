@@ -26,7 +26,9 @@ export default class IFrameWindow {
         this._frame.style.display = "none";
         this._frame.style.width = 0;
         this._frame.style.height = 0;
-        this._frame.name = params.originUrl;
+        if (params.originUrl) {
+            this._frame.name = params.originUrl;
+        }
 
         window.document.body.appendChild(this._frame);
     }
