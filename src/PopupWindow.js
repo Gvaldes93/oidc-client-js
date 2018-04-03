@@ -27,7 +27,9 @@ export default class PopupWindow {
         window.addEventListener("message", this._boundMessageEvent, false);
 
         this._popup = window.open('', target, features);
-        this._popup.name = params.originUrl;
+        if (params.originUrl) {
+            this._popup.name = params.originUrl;
+        }
 
         if (this._popup) {
             Log.debug("popup successfully created");
@@ -131,14 +133,19 @@ export default class PopupWindow {
             if (url) {
 
                 var data = UrlUtility.parseUrlFragment(url, delimiter);
-                
+
                 if (data.state) {
                     const originUrl = window.name;
 
                     if (originUrl) {
-                        window.opener.postMessage({type: "signinPopupResponse", url: url, keepOpen: keepOpen}, `${originUrl}`);
-                        return;    
+                        window.opener.postMessage({ type: "signinPopupResponse", url: url, keepOpen: keepOpen }, `${originUrl}`);
+                        return;
                     }
+
+                    const protocol = location.protocol;
+                    const host = location.host;
+
+                    window.parent.postMessage({ type: "signinPopupResponse", url: url, keepOpen: keepOpen }, `${protocol}//${host}`);
                 }
                 else {
                     Log.warn("no state found in response url");
