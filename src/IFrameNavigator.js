@@ -11,11 +11,11 @@ export default class IFrameNavigator {
         return Promise.resolve(frame);
     }
 
-    callback(url, parentUrl) {
+    callback(url) {
         Log.debug("IFrameNavigator.callback");
 
         try {
-            IFrameWindow.notifyParent(url, parentUrl);
+            IFrameWindow.notifyParent(url);
             return Promise.resolve();
         }
         catch (e) {
